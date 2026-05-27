@@ -1,4 +1,4 @@
-import { StartTaskHandler, TaskFinishedHandler, TaskFailedHandler } from './types';
+import { StartTaskHandler, TaskFinishedHandler, TaskFailedHandler, ResizeUIHandler } from './types';
 import { ToolResult } from './tools/tool-result';
 import { serializeNode } from './serialization/serialization';
 import { getNodeInfo } from './tools/read/get-node-info';
@@ -172,9 +172,13 @@ function main() {
   })
 
 
+  on<ResizeUIHandler>('RESIZE_UI', function ({ width, height }) {
+    figma.ui.resize(width, height);
+  });
+
   const additionalData = `<div id='data' />`;
   const html = `${additionalData}${__html__}`;
-  figma.showUI(`${html}`, { width: 500, height: 405 });
+  figma.showUI(`${html}`, { width: 300, height: 320 });
 }
 
 main();

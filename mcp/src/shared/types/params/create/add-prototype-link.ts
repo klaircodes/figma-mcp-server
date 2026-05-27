@@ -6,7 +6,7 @@ export const AddPrototypeLinkParamsSchema = z.object({
     trigger: z.enum(["ON_CLICK", "ON_HOVER", "ON_PRESS", "ON_DRAG"]).optional().default("ON_CLICK").describe("Trigger type"),
     navigation: z.enum(["NAVIGATE", "OVERLAY", "SWAP", "CHANGE_TO"]).optional().default("NAVIGATE").describe("Navigation type"),
     transition: z.enum(["DISSOLVE", "SMART_ANIMATE", "MOVE_IN", "MOVE_OUT", "PUSH", "SLIDE_IN", "SLIDE_OUT", "INSTANT"]).optional().default("DISSOLVE").describe("Transition type"),
-    duration: z.number().optional().default(300).describe("Transition duration in ms"),
+    duration: z.coerce.number().optional().default(300).describe("Transition duration in ms"),
 });
 
 export type AddPrototypeLinkParams = z.infer<typeof AddPrototypeLinkParamsSchema>;

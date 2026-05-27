@@ -9,6 +9,12 @@ export interface StartTaskHandler extends EventHandler {
   args: any
 }
 
+export interface ResizeUIHandler extends EventHandler {
+  name: 'RESIZE_UI'
+  width: number
+  height: number
+}
+
 export interface TaskFinishedHandler extends EventHandler, FromPluginMessage {
   name: 'TASK_FINISHED'
 }
