@@ -5,12 +5,12 @@ import { SetNodeComponentPropertyReferencesParamsSchema, type SetNodeComponentPr
 
 export function setNodeComponentPropertyReferences(server: McpServer, taskManager: TaskManager) {
     server.tool(
-        "set-node-component-property-references",
+        "set-prop-refs",
         "Set the component property references of a node.",
         SetNodeComponentPropertyReferencesParamsSchema.shape,
         async (params: SetNodeComponentPropertyReferencesParams) => {
             return await safeToolProcessor<SetNodeComponentPropertyReferencesParams>(
-                taskManager.runTask("set-node-component-property-references", params)
+                taskManager.runTask("set-prop-refs", params)
             );
         }
     );

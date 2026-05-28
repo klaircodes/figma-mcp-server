@@ -121,7 +121,7 @@ function main() {
         result = await safeToolProcessor<SetInstancePropertiesParams>(setInstanceProperties)(task.args as SetInstancePropertiesParams);
       }
 
-      if (task.command === 'set-node-component-property-references') {
+      if (task.command === 'set-prop-refs') {
         result = await safeToolProcessor<SetNodeComponentPropertyReferencesParams>(setNodeComponentPropertyReferences)(task.args as SetNodeComponentPropertyReferencesParams);
       }
 

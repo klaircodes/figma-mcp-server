@@ -970,7 +970,7 @@
         if (task.command === "set-instance-properties") {
           result = await safeToolProcessor(setInstanceProperties)(task.args);
         }
-        if (task.command === "set-node-component-property-references") {
+        if (task.command === "set-prop-refs") {
           result = await safeToolProcessor(setNodeComponentPropertyReferences)(task.args);
         }
         if (task.command === "create-component") {
