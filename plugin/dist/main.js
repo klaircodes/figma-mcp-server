@@ -18,7 +18,7 @@
       current = Object.getPrototypeOf(current);
     }
     allProps.forEach((prop) => {
-      if (prop === "parent" || prop === "removed" || prop === "instances" || prop === "mainComponent" || prop === "masterComponent" || typeof node[prop] === "function") {
+      if (prop === "parent" || prop === "removed" || prop === "instances" || prop === "mainComponent" || prop === "masterComponent" || prop === "componentPropertyDefinitions" || typeof node[prop] === "function") {
         return;
       }
       if (prop === "children") {

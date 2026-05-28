@@ -40,6 +40,7 @@ export function serializeNode(node: SceneNode, visited: Set<string> = new Set())
             || prop === 'instances'
             || prop === 'mainComponent'
             || prop === 'masterComponent'
+            || prop === 'componentPropertyDefinitions'
             || typeof (node as any)[prop] === 'function'
             ) {
             return;
