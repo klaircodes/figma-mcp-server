@@ -1,113 +1,122 @@
-# Figma Model Context protocol server
+# Figma MCP Server
 
-[![Community Figma MCP server - Allow AI Agents to help you with Figma designs! | Product Hunt](https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=1056256&amp;theme=light&amp;period=daily&amp;t=1767540612947)](https://www.producthunt.com/products/community-figma-mcp-server?embed=true&amp;utm_source=badge-top-post-badge&amp;utm_medium=badge&amp;utm_campaign=badge-community-figma-mcp-server)
+[![Community Figma MCP server - Allow AI Agents to help you with Figma designs! | Product Hunt](https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=1056256&theme=light&period=daily&t=1767540612947)](https://www.producthunt.com/products/community-figma-mcp-server?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_campaign=badge-community-figma-mcp-server)
 
-## Problem
+## Why this exists
 
-The official Figma MCP server has only read-only tools. **You can not change anything in the Figma document using the official Figma MCP server.**
-You can use AI Agent in Figma Make. But, it is not convenient to chat in Figma Make and then move result to Figma to continue.
+Figma has an official MCP endpoint that tools like Cursor, Claude, and Windsurf can connect to. The problem is it's **read-only** — the AI can inspect your designs but can't create or change anything.
 
-**The goal is to enable AI Agents to work with your Figma documents.**
+The only way to actually modify a Figma document programmatically is through their plugin system, which runs inside the Figma app itself. This project bridges that gap: a plugin runs inside Figma with full edit permissions, and a local server acts as the go-between for your AI agent. The AI talks to the server, the server talks to the plugin, the plugin edits your document.
 
-You are able to ask you AI agent to implement the design in Figma that you want with this MCP server!
+**The short version:** Figma's official MCP lets AI see your designs. This lets AI actually build them.
 
-## Usage
+## Setup
 
 ### Prerequisites
-1. Install `Node.js` if you don't have it
-2. Clone this repository
+- [Node.js](https://nodejs.org/) installed
+- A Figma account
 
-### Start Figma Plugin
+### First time only
 
-1. Switch to plugin directory: `cd plugin`
-2. Install dependencies: `npm i`
-3. Build Figma Plugin `npm run build`
-4. Open Figma, open document you want to work with
-5. Add Figma Plugin *Plugins* > *Development* > *Imprort Plugin from manifest*, select `/plugin/manifest.json`
-6. Start the *Figma MCP Server* plugin
-7. Expected result: Message *Not connected to MCP server* should be shown
-8. Do not close Plugin window. It will show message *Connected to MCP server* when it is started.
+**1. Clone the repo**
+```bash
+git clone https://github.com/klaircodes/figma-mcp-server.git
+cd figma-mcp-server
+```
 
-Next time you can start plugin from: *Plugins* > *Development* > *Figma MCP Server*. And do 1-3 steps only when you want to get latest changes.
+**2. Install dependencies and build**
+```bash
+npm run setup
+```
 
-### Start MCP server 
+**3. Import the plugin into Figma**
+1. Open Figma and open the document you want to work with
+2. Go to **Plugins** > **Development** > **Import plugin from manifest**
+3. Select `plugin/manifest.json` from this repo
+4. The plugin is now saved — you only need to do this once
 
-1. Switch to MCP directory: `cd mcp`
-2. Install dependencies: `npm i`
-3. Start the server: `npm run start`
-4. Expected result: Messages `Server listening on http://localhost:38450` and `a user connected: .............` in the console
+### Every session
 
-### Configure MCP server in your client
+**1. Start the MCP server**
+```bash
+npm start
+```
 
-1. Use Streaming HTTP transport and `http://localhost:38450/mcp` URL
-2. Turn off tools that you don't need
+**2. Open the plugin in Figma**
+Go to **Plugins** > **Development** > **Figma MCP Server**
 
-Now you should be able to ask your AI Agent to do something in Figma. For example:
+The plugin will show a green dot and "Connected" once the server is running.
 
-![Claude](doc/Claude.png)
-![Figma](doc/Figma.png)
+**3. Configure your AI client**
 
+Add the following to your MCP client config (Cursor, Claude Code, Windsurf, etc.):
 
-**We are working on publishing it as Figma plugin. Figma reviewers haven't accepted it so far.**
-Once Figma accept it as plugin, the configuration and start will be simplified a lot!
+```json
+{
+  "mcpServers": {
+    "figma": {
+      "url": "http://localhost:38450/mcp"
+    }
+  }
+}
+```
 
-## Tools
+You're ready. Ask your AI agent to build something in Figma.
 
-TBD
+## Example prompts
 
-## Development
+```
+Design a mobile app home screen (390×844) for a fitness tracking app called Pulse.
+Include a greeting header, a stats row with 3 cards (steps, calories, active minutes),
+a Today's Workouts section with 2 workout cards, and a bottom nav bar with 4 items.
+Use a dark background with a blue accent color.
+```
 
-Contributions to the project are welcome!
+```
+Create a dashboard (1440×900) for a proposal management tool. Dark left sidebar nav,
+top bar with user avatar, 3 KPI cards (Active Proposals, Win Rate, Avg Deal Size),
+and a table below with 4 recent proposals showing client name, status, value, and date.
+```
 
-### MCP server
-1. `cd mcp`
-2. `npm i`
-3. `npm run dev`
+## How it works
 
-### Plugin
-1. `cd plugin`
-2. `npm i`
-3. `npm run dev`
-4. Open Figma
-5. Plugins > Development > Import plugin from manifest ...
-6. Select `manifest.json` from `plugin\manifest.json`
-7. Start plugin
-8. You should see *Connected to MCP server* message
+The plugin and server communicate over a WebSocket connection:
 
-### Add Plugin to Figma
-1. Open Figma
-2. Add Figma Plugin *Plugins* > *Development* > *Imprort Plugin from manifest*, select `/plugin/manifest.json`
+1. Your AI agent sends a tool call to the local MCP server
+2. The server queues the task and forwards it to the plugin via WebSocket
+3. The plugin executes the action inside Figma using the Plugin API
+4. The result is returned back through the same path to your AI agent
 
-### Inspector
-1. `cd mcp`
-2. `npm run inspector`
-3. Use `http://127.0.0.1:38450/mcp` to connect
-
-## Architecture
-
-WebSockets server is used as a medium to transfer messages between MCP Server and Figma Plugin.
-
-MCP server starts *Express.js* server with MCP endpoints and WebSockets *socket.io* server for communication with Plugin.
-MCP server save tool calls into the queue and send message to WebSockets server.
-
-Figma Plugin listen to the WebSocket server. And if there are any tasks to do, it takes them, do required actions, and return the result.
-
-MCP server listen to the WebSockets server. If there are any messages from Figma plugin then it processes them. It found the apropriacte tool call in the queue. And executes the promise with the result from Figma plugin. If any of tool calls are executed for too long then it returns timeout wihtout waiting for the response.
+The plugin must stay open while the AI is working — it's the only thing with permission to edit your document.
 
 ![Architecture](doc/figma-mcp-architecture.png)
 ![Sequence](doc/figma-mcp-sequence.svg)
 
+## Development
+
+**MCP server**
+```bash
+cd mcp && npm run dev
+```
+
+**Plugin**
+```bash
+cd plugin && npm run dev
+```
+Then import `plugin/manifest.json` in Figma and start the plugin.
+
+**MCP Inspector**
+```bash
+cd mcp && npm run inspector
+# Connect to http://127.0.0.1:38450/mcp
+```
 
 ## Security
 
-Plugin gives access to your design document for external systems: AI Agents that you will connect. It acts as a bridge in the similar way as the official Figma MCP server. And, similar to the official MCP server it works on local machine and do not expose any information to the networks.
+The plugin and server only communicate locally — nothing leaves your machine. The server binds to `localhost:38450` and is not exposed to the network by default.
 
-If you want to use it in the network, please do it on your own risk.
-
-If you found any security issue, please report it via GitHub issue. 
+If you expose it externally, do so at your own risk.
 
 ## Alternatives
 
-If your tasks could be done by [official Figma MCP server](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server), please use it.
-
-Before starting this project, I made a search for my idea to implement Figma MCP server using Figma plugin and sockets as protocol for communication. And I found [this one](https://github.com/grab/cursor-talk-to-figma-mcp). Initially, I thought to fork it and change for my needs. But, there are few things that I don't like: requirement to run separate server for socket, everything located in one file, very hard to maintain, JavaScript(not TypeScript or Python). But, you always can consider that server as an alternative.
+If read-only access is enough for your use case, the [official Figma MCP server](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) is simpler to set up.
